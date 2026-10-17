@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>True or False? AI and learning</title>
+<link rel="preload" href="fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Oswald";font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/oswald-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Oswald";font-style:normal;font-weight:500 700;font-display:swap;src:url(fonts/oswald-latin.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Public Sans";font-style:normal;font-weight:400 800;font-display:swap;src:url(fonts/public-sans-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C4,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Public Sans";font-style:normal;font-weight:400 800;font-display:swap;src:url(fonts/public-sans-latin.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{
+  --bg:#F6F2E9; --surface:#FFFCF5; --surface-2:#ECE5D6; --ink:#15203A; --muted:#4A5570; --line:#DDD4C2;
+  --accent:#A34A15; --stage:#15203A; --stage-ink:#F6F2E9; --stage-muted:#C9D0DE; --stage-card:#1F2C4F; --stage-line:#3A4B78;
+  --true-bg:#2D5DA8; --true-ink:#F6F2E9; --false-bg:#F28C38; --false-ink:#15203A; --unk-bg:#CFC6B3; --unk-ink:#15203A;
+  --focus:#2D5DA8;
+  --display:"Oswald","Avenir Next Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1830; --surface:#18233F; --surface-2:#22305A; --ink:#F1ECE1; --muted:#B8C0D1; --line:#2E3C63;
+    --accent:#F2A25E; --stage:#1A2644; --stage-ink:#F1ECE1; --stage-muted:#B8C0D1; --stage-card:#24335C;
+    --focus:#8FB2EA; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1830; --surface:#18233F; --surface-2:#22305A; --ink:#F1ECE1; --muted:#B8C0D1; --line:#2E3C63;
+  --accent:#F2A25E; --stage:#1A2644; --stage-ink:#F1ECE1; --stage-muted:#B8C0D1; --stage-card:#24335C;
+  --focus:#8FB2EA; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  overflow-wrap:normal;word-break:normal;hyphens:manual}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--stage)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.display{font-family:var(--display);font-weight:600;letter-spacing:.01em;line-height:1.08}
+
+/* Top bar */
+header.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--stage);color:var(--stage-ink)}
+.bar-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;padding:10px 16px}
+.brand{font-family:var(--display);font-weight:600;font-size:20px;white-space:nowrap}
+@media (max-width:560px){.brand{display:none}}
+nav.steps{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1}
+nav.steps::-webkit-scrollbar{display:none}
+nav.steps button{flex:none;min-height:44px;border:1px solid transparent;background:transparent;color:var(--stage-muted);padding:7px 12px;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+nav.steps button[aria-current="step"]{background:var(--stage-card);color:var(--stage-ink);border-color:var(--stage-line)}
+nav.steps button:hover{color:var(--stage-ink)}
+.lang{display:flex;flex:none;border:1px solid var(--stage-line);border-radius:999px;overflow:hidden}
+.lang button{border:none;background:transparent;color:var(--stage-muted);font-weight:700;font-size:13px;min-width:44px;min-height:44px;padding:0 10px;cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--stage-ink);color:var(--stage)}
+
+main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+main:focus{outline:none}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.kicker{color:var(--accent);font-weight:700;font-size:15px}
+.lede{color:var(--muted);font-size:18px;max-width:60ch}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.note{font-size:14px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}
+.btn{appearance:none;display:inline-flex;align-items:center;justify-content:center;min-height:48px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);font-weight:700;padding:12px 18px;border-radius:12px;cursor:pointer;font-size:16px;text-decoration:none;text-align:center}
+.btn.block{width:100%}
+.btn.secondary{background:transparent;color:var(--ink)}
+.linkbtn{background:none;border:none;color:var(--accent);font-weight:700;cursor:pointer;min-height:44px;padding:0 2px;text-decoration:underline;text-underline-offset:3px}
+
+/* Verdict colors */
+.v-true{background:var(--true-bg);color:var(--true-ink)}
+.v-false{background:var(--false-bg);color:var(--false-ink)}
+.v-unknown{background:var(--unk-bg);color:var(--unk-ink)}
+
+/* Intro */
+.hero{background:var(--stage);color:var(--stage-ink);border-radius:20px;padding:28px 22px 26px;display:flex;flex-direction:column;gap:18px}
+.hero h1{font-size:clamp(56px,16vw,96px);text-transform:uppercase}
+.hero p{color:var(--stage-muted);font-size:18px;max-width:46ch}
+.hero .btn{background:var(--false-bg);border-color:var(--false-bg);color:var(--false-ink);align-self:flex-start}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.04em;text-transform:uppercase;padding:6px 12px;border-radius:8px}
+.howto ol{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.howto li{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.howto b{display:block}
+
+/* Statement */
+.stage{background:var(--stage);color:var(--stage-ink);border-radius:20px;padding:22px 20px;display:flex;flex-direction:column;gap:18px}
+.stage .count{color:var(--stage-muted);font-size:14px;font-weight:600}
+.stage .statement{font-size:clamp(30px,7.4vw,46px)}
+.votes{display:grid;gap:10px}
+.votes.three{grid-template-columns:repeat(3,1fr)}
+.votes.two{grid-template-columns:repeat(2,1fr)}
+.vote{min-height:64px;min-width:0;border:none;border-radius:12px;padding:12px 6px;font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:.03em;text-transform:uppercase;cursor:pointer;line-height:1.1}
+.vote:hover{filter:brightness(1.06)}
+.vote:active{transform:translateY(1px)}
+.stamp{align-self:flex-start;font-family:var(--display);font-weight:700;font-size:clamp(34px,9vw,52px);text-transform:uppercase;letter-spacing:.05em;padding:6px 18px;border-radius:10px;transform:rotate(-3deg);animation:stamp .42s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes stamp{0%{transform:rotate(-9deg) scale(1.7);opacity:0}100%{transform:rotate(-3deg) scale(1);opacity:1}}
+@media (prefers-reduced-motion: reduce){.stamp{animation:none}}
+.you{color:var(--stage-muted);font-size:16px}
+.reveal{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.reveal .headline{font-size:22px;line-height:1.25}
+.reveal ul{margin:0;padding-left:20px;display:grid;gap:8px}
+.source{color:var(--muted);font-size:14px}
+
+/* Round 3 */
+.match{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px}
+.pair{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch}
+.pair .plus{align-self:center;font-family:var(--display);font-size:26px;color:var(--accent)}
+.half{background:var(--surface-2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.half .lab{font-size:13px;font-weight:700;color:var(--muted)}
+.half .chip{align-self:flex-start;font-size:13px;padding:3px 8px}
+.project{background:var(--stage);color:var(--stage-ink);border-radius:12px;padding:14px;display:grid;gap:4px}
+.project .who{color:var(--stage-muted);font-size:14px}
+.project h3{font-size:24px}
+@media (max-width:520px){.pair{grid-template-columns:1fr}.pair .plus{justify-self:center;line-height:1}}
+
+/* Exit */
+.exit-head h1{font-size:clamp(44px,12vw,72px);text-transform:uppercase}
+.score{font-family:var(--display);font-weight:600;font-size:26px}
+.link-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:grid;gap:10px}
+.link-card h2{font-size:28px}
+.link-card .btn{justify-self:start}
+
+footer.foot{max-width:760px;margin:0 auto;padding:0 16px 32px;color:var(--muted);font-size:13px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bar-inner">
+    <span class="brand" id="brand"></span>
+    <nav class="steps" id="nav"></nav>
+    <div class="lang" role="group" aria-label="Language / Valoda">
+      <button type="button" data-lang="en" lang="en">EN</button><button type="button" data-lang="lv" lang="lv">LV</button>
+    </div>
+  </div>
+</header>
+<main id="app" tabindex="-1"></main>
+<footer class="foot"><p id="foot"></p></footer>
+<div class="sr" aria-live="polite" id="live"></div>
+
+<script>
+"use strict";
+/* ---------- Content, in English and Latvian ---------- */
+const I18N = {
+en: {
+  title:"True or False? AI and learning",
+  brand:"True or false?",
+  VERDICT:{ true:"True", false:"False", unknown:"Not yet known" },
+  SCREENS:[["intro","Start"],["r1","Round 1"],["r2","Round 2"],["r3","Round 3"],["exit","Keep exploring"]],
+  q:t => `“${t}”`,
+  R1:[
+    { id:"r1a", text:"AI detectors can reliably tell when a student used AI.", answer:"false",
+      headline:"Seven popular detectors falsely flagged 61% of essays by non-native English writers as AI, on average.",
+      points:["The same detectors were near-perfect on essays by U.S. 8th graders. They flag plainer English, not AI use.",
+              "Asking ChatGPT to make its writing more sophisticated helped AI-written text slip past."],
+      source:"Liang, Yuksekgonul, Mao, Wu & Zou (2023), Patterns" },
+    { id:"r1b", text:"AI tutors improve student learning.", answer:"unknown",
+      headline:"It depends on the tool, and on what you measure.",
+      points:["A hint-giving GPT-4 tutor: same final exam scores as the textbook group, not better (Bastani et al., 2025).",
+              "An AI tutor raised homework scores but not exam scores (Chen et al., 2025).",
+              "LearnLM, with expert tutors overseeing it, did at least as well as human tutors (LearnLM Team & Eedi, 2025).",
+              "Only 20 of 800+ papers offered causal evidence. None studied U.S. K-12 students using AI."],
+      source:"Fesler et al. (2026), The Evidence Base on AI in K-12, Stanford SCALE" },
+    { id:"r1c", text:"Students who practiced math with ChatGPT did worse on the test.", answer:"true",
+      headline:"High schoolers who practiced with unrestricted GPT-4 scored 17% lower on the closed-book exam.",
+      points:["Their practice scores rose while they had the AI.",
+              "A tutor version that gave hints instead of answers removed the drop.",
+              "About 1,000 high school students in Turkey, four 90-minute sessions."],
+      source:"Bastani et al. (2025), PNAS" }
+  ],
+  R2:[
+    { id:"r2a", text:"Teaching material to someone else deepens your own understanding.", answer:"true",
+      name:"The protégé effect", headline:"We work harder to learn for someone else than for ourselves.",
+      points:["Students teaching a computer “teachable agent” put more effort into learning than students learning for themselves (Chase et al., 2009).",
+              "Actually explaining, not just preparing to, produced the strongest learning (Fiorella & Mayer, 2013)."],
+      source:"Chase, Chin, Oppezzo & Schwartz (2009); Fiorella & Mayer (2013)" },
+    { id:"r2b", text:"Practice that feels easy and fluent produces the most learning.", answer:"false",
+      name:"Desirable difficulties", headline:"Effort during practice is often what makes learning last.",
+      points:["Spacing practice out, mixing problem types and recalling from memory feel harder, and make learning last longer (Bjork, 1994).",
+              "Students rated an AI chatbot the most helpful way to study a text. It produced the least learning (Kreijkes et al., 2026)."],
+      source:"Bjork (1994); Kornell & Bjork (2008); Kreijkes et al. (2026)" },
+    { id:"r2c", text:"Quizzes measure learning; they don’t cause it.", answer:"false",
+      name:"The testing effect", headline:"Pulling information out of memory strengthens it.",
+      points:["Students who practiced recalling a passage remembered more a week later than students who reread it (Roediger & Karpicke, 2006).",
+              "The rereaders felt more confident they would remember it."],
+      source:"Roediger & Karpicke (2006), Psychological Science" }
+  ],
+  R3:[
+    { claim:"Practicing with ChatGPT led to a worse test", claimV:"true", principle:"Desirable difficulties", principleNote:"Easy practice is not more learning",
+      projects:[
+        { name:"Fading-Scaffold Trial", who:"Alberta Longhini", what:"A tutor whose help fades, one whose help doesn’t, or no tutor. The test: a final lab with no scaffolds." },
+        { name:"Designing with AI", who:"Lundberg, Venook, Klass, Chase", what:"AI as critic of students’ ideas versus AI as co-designer, randomized across about 60 seniors." } ] },
+    { claim:"AI tutors improve learning", claimV:"unknown", principle:"The protégé effect", principleNote:"Teaching deepens learning",
+      projects:[ { name:"TeachableAgent", who:"John Mitchell, Anushree Aggarwal", what:"Students teach the AI instead. It asks them to explain their reasoning and flags gaps. A pilot found explanations grew more complete and precise." } ] },
+    { claim:"AI detectors are reliable", claimV:"false", principle:"The testing effect", principleNote:"Quizzes cause learning",
+      projects:[ { name:"The Socratic Tutor", who:"Michael C. Frank, Huijun Mao, Bonnie Krejci", what:"A short AI conversation about each reading replaces written responses. Each check is retrieval practice, and harder to hand off to AI." } ] }
+  ],
+  ui:{
+    nav:"Game sections",
+    heroP:"Three quick rounds on AI and learning.",
+    start:"Start round 1",
+    howtoLabel:"How it works",
+    howto:[["Round 1: AI claims","Vote True, False, or Not yet known."],["Round 2: Learning science","True or False only."],["Round 3: Where they meet","How Stanford researchers test the overlap."],["Keep exploring","Two Stanford toolkits to try next."]],
+    privacy:"Your answers stay on this phone.",
+    r1Name:"Round 1: AI claims", r2Name:"Round 2: Learning science",
+    stmt:(i, n) => `Statement ${i} of ${n}`,
+    yourVote:"Your vote",
+    next:"Next statement", toR2:"On to round 2", toR3:"On to round 3",
+    youSaid:v => `You said ${v}.`, right:"Nice call.", wrong:"Plenty of people miss this one.",
+    evidenceLabel:"What the evidence says", source:"Source:",
+    prev:"Previous statement", revote:"Change my vote",
+    r3Kicker:"Round 3: Where they meet",
+    r3Score:(r, a) => `You got ${r} of ${a} right. Now the payoff: each claim meets a principle, and researchers are testing the overlap.`,
+    r3NoScore:"Each AI claim meets a learning principle, and researchers are testing the overlap.",
+    matchLabel:k => `Match ${k}`, aiClaim:"AI claim", principle:"Learning principle", testing:w => `Testing it: ${w}`,
+    r3Note:"All three are 2026 Stanford seed grants in university courses. Nobody has tested these in U.S. K-12 classrooms yet.",
+    toExit:"Keep exploring",
+    exitTitle:"Keep exploring",
+    exitLede:"You’ve seen what the evidence says. Now try things for yourself.",
+    exitScore:(r, a) => `You got ${r} of ${a} right.`,
+    tinkeryName:"AI Tinkery Playbook",
+    tinkeryBody:"How to start your own space for playing and tinkering with AI, plus a toolkit of hands-on AI activities for educators.",
+    tinkeryCta:"Open the playbook",
+    flashName:"AI Flash Lab",
+    flashBody:"A facilitator toolkit for a 2- or 3-hour workshop where teams design an AI solution to an education challenge, from problem to prototype to pitch.",
+    flashCta:"Open AI Flash Lab",
+    newTab:"(opens in a new tab)",
+    replay:"Play again",
+    announce:v => `The answer is ${v}.`,
+    foot:"Evidence from Fesler, Martinez Claeys, Agnew & Loeb (2026), The Evidence Base on AI in K-12, Stanford SCALE; Liang et al. (2023); and the learning-science studies cited on each card. Projects: Stanford Accelerator for Learning seed grants."
+  }
+},
+lv: {
+  title:"Patiesi vai aplami? MI un mācīšanās",
+  brand:"Patiesi vai aplami?",
+  VERDICT:{ true:"Patiesi", false:"Aplami", unknown:"Vēl nav zināms" },
+  SCREENS:[["intro","Sākums"],["r1","1. kārta"],["r2","2. kārta"],["r3","3. kārta"],["exit","Turpiniet izzināt"]],
+  q:t => `„${t}”`,
+  R1:[
+    { id:"r1a", text:"MI detektori var droši noteikt, vai skolēns ir izmantojis MI.", answer:"false",
+      headline:"Septiņi populāri detektori vidēji 61% gadījumu kļūdaini atzīmēja kā MI rakstītas esejas, kuru autoriem angļu valoda nav dzimtā.",
+      points:["Tie paši detektori gandrīz nekļūdījās ar ASV 8. klases skolēnu esejām. Tie atpazīst vienkāršāku angļu valodu, nevis MI izmantošanu.",
+              "Ja ChatGPT palūdza rakstīt izsmalcinātākā valodā, MI rakstītais teksts vieglāk paslīdēja garām."],
+      source:"Liang, Yuksekgonul, Mao, Wu un Zou (2023), Patterns" },
+    { id:"r1b", text:"MI pasniedzēji uzlabo skolēnu mācīšanos.", answer:"unknown",
+      headline:"Tas atkarīgs no rīka un no tā, ko mēra.",
+      points:["GPT-4 pasniedzējs, kas dod mājienus: gala eksāmenā tādi paši rezultāti kā mācību grāmatas grupai, ne labāki (Bastani u. c., 2025).",
+              "MI pasniedzējs uzlaboja mājasdarbu, bet ne eksāmena rezultātus (Chen u. c., 2025).",
+              "LearnLM ekspertu uzraudzībā sasniedza vismaz tikpat labus rezultātus kā cilvēki pasniedzēji (LearnLM Team un Eedi, 2025).",
+              "Tikai 20 no vairāk nekā 800 rakstiem sniedza cēloņsakarību pierādījumus. Neviens nepētīja ASV skolēnus, kas izmanto MI."],
+      source:"Fesler u. c. (2026), The Evidence Base on AI in K-12, Stanford SCALE" },
+    { id:"r1c", text:"Skolēni, kas matemātikā trenējās ar ChatGPT, testā uzrādīja sliktākus rezultātus.", answer:"true",
+      headline:"Vidusskolēniem, kas trenējās ar neierobežotu GPT-4, eksāmenā bez palīglīdzekļiem rezultāti bija par 17% zemāki.",
+      points:["Kamēr MI bija pieejams, viņu treniņu rezultāti uzlabojās.",
+              "Pasniedzēja versija, kas deva mājienus, nevis atbildes, šo kritumu novērsa.",
+              "Aptuveni 1000 vidusskolēnu Turcijā, četras 90 minūšu nodarbības."],
+      source:"Bastani u. c. (2025), PNAS" }
+  ],
+  R2:[
+    { id:"r2a", text:"Mācot vielu kādam citam, padziļinās paša izpratne.", answer:"true",
+      name:"Protežē efekts", headline:"Mēs cenšamies vairāk, ja mācāmies kāda cita labā, nevis tikai sev.",
+      points:["Skolēni, kas mācīja datorizētu „mācāmo aģentu”, ieguldīja mācībās vairāk pūļu nekā tie, kas mācījās paši sev (Chase u. c., 2009).",
+              "Vislabākos rezultātus deva tieša skaidrošana, nevis tikai gatavošanās skaidrot (Fiorella un Mayer, 2013)."],
+      source:"Chase, Chin, Oppezzo un Schwartz (2009); Fiorella un Mayer (2013)" },
+    { id:"r2b", text:"Trenēšanās, kas šķiet viegla un raita, dod vislabāko mācīšanos.", answer:"false",
+      name:"Vēlamās grūtības", headline:"Piepūle treniņa laikā bieži vien ir tas, kas padara mācīšanos noturīgu.",
+      points:["Treniņu sadalīšana laikā, dažādu uzdevumu veidu jaukšana un atcerēšanās no atmiņas šķiet grūtāka, bet iemācītais saglabājas ilgāk (Bjork, 1994).",
+              "Skolēni MI tērzētāju novērtēja kā visnoderīgāko veidu, kā apgūt tekstu. Tas deva vismazāko mācīšanos (Kreijkes u. c., 2026)."],
+      source:"Bjork (1994); Kornell un Bjork (2008); Kreijkes u. c. (2026)" },
+    { id:"r2c", text:"Testi mēra mācīšanos, bet to neizraisa.", answer:"false",
+      name:"Testēšanas efekts", headline:"Informācijas atsaukšana no atmiņas to nostiprina.",
+      points:["Skolēni, kas trenējās atcerēties tekstu, pēc nedēļas atcerējās vairāk nekā tie, kas to pārlasīja (Roediger un Karpicke, 2006).",
+              "Pārlasītāji bija pārliecinātāki, ka atcerēsies."],
+      source:"Roediger un Karpicke (2006), Psychological Science" }
+  ],
+  R3:[
+    { claim:"Trenēšanās ar ChatGPT noveda pie sliktāka testa rezultāta", claimV:"true", principle:"Vēlamās grūtības", principleNote:"Viegls treniņš nenozīmē vairāk mācīšanās",
+      projects:[
+        { name:"Fading-Scaffold Trial", who:"Alberta Longhini", what:"Pasniedzējs, kura palīdzība pakāpeniski izzūd, pasniedzējs, kura palīdzība saglabājas, vai bez pasniedzēja. Pārbaude: noslēguma laboratorijas darbs bez atbalsta." },
+        { name:"Designing with AI", who:"Lundberg, Venook, Klass, Chase", what:"MI kā studentu ideju kritiķis pret MI kā līdzautoru; aptuveni 60 pēdējā kursa studenti sadalīti nejauši." } ] },
+    { claim:"MI pasniedzēji uzlabo mācīšanos", claimV:"unknown", principle:"Protežē efekts", principleNote:"Mācot citus, padziļinās izpratne",
+      projects:[ { name:"TeachableAgent", who:"John Mitchell, Anushree Aggarwal", what:"Studenti paši māca MI. Tas lūdz izskaidrot savu domāšanu un norāda uz robiem. Izmēģinājumā skaidrojumi kļuva pilnīgāki un precīzāki." } ] },
+    { claim:"MI detektori ir uzticami", claimV:"false", principle:"Testēšanas efekts", principleNote:"Testi veicina mācīšanos",
+      projects:[ { name:"The Socratic Tutor", who:"Michael C. Frank, Huijun Mao, Bonnie Krejci", what:"Īsa saruna ar MI par katru lasāmo tekstu aizstāj rakstiskas atbildes. Katra pārbaude ir atcerēšanās treniņš, un to ir grūtāk uzticēt MI." } ] }
+  ],
+  ui:{
+    nav:"Spēles sadaļas",
+    heroP:"Trīs īsas kārtas par mākslīgo intelektu (MI) un mācīšanos.",
+    start:"Sākt 1. kārtu",
+    howtoLabel:"Kā tas notiek",
+    howto:[["1. kārta: apgalvojumi par MI","Balsojiet: patiesi, aplami vai vēl nav zināms."],["2. kārta: mācīšanās zinātne","Tikai patiesi vai aplami."],["3. kārta: kur tie satiekas","Kā Stenfordas pētnieki pārbauda šo krustpunktu."],["Turpiniet izzināt","Divas Stenfordas rīkkopas, ko izmēģināt tālāk."]],
+    privacy:"Jūsu atbildes paliek šajā tālrunī.",
+    r1Name:"1. kārta: apgalvojumi par MI", r2Name:"2. kārta: mācīšanās zinātne",
+    stmt:(i, n) => `Apgalvojums ${i} no ${n}`,
+    yourVote:"Jūsu balss",
+    next:"Nākamais apgalvojums", toR2:"Uz 2. kārtu", toR3:"Uz 3. kārtu",
+    youSaid:v => `Jūsu atbilde: ${v}.`, right:"Pareizi!", wrong:"Šajā jautājumā daudzi kļūdās.",
+    evidenceLabel:"Ko saka pierādījumi", source:"Avots:",
+    prev:"Iepriekšējais apgalvojums", revote:"Mainīt balsi",
+    r3Kicker:"3. kārta: kur tie satiekas",
+    r3Score:(r, a) => `Pareizas atbildes: ${r} no ${a}. Tagad galvenais: katrs apgalvojums satiekas ar kādu principu, un pētnieki pārbauda šo krustpunktu.`,
+    r3NoScore:"Katrs apgalvojums par MI satiekas ar kādu mācīšanās principu, un pētnieki pārbauda šo krustpunktu.",
+    matchLabel:k => `${k}. pāris`, aiClaim:"Apgalvojums par MI", principle:"Mācīšanās princips", testing:w => `Pārbauda: ${w}`,
+    r3Note:"Visi trīs ir 2026. gada Stenfordas sēklas granti universitātes kursos. Skolās tos vēl neviens nav pārbaudījis.",
+    toExit:"Turpināt izzināt",
+    exitTitle:"Turpiniet izzināt",
+    exitLede:"Jūs redzējāt, ko saka pierādījumi. Tagad izmēģiniet paši.",
+    exitScore:(r, a) => `Pareizas atbildes: ${r} no ${a}.`,
+    tinkeryName:"AI Tinkery rokasgrāmata",
+    tinkeryBody:"Kā izveidot savu telpu, kur spēlēties un eksperimentēt ar MI, un praktisku MI aktivitāšu rīkkopa pedagogiem.",
+    tinkeryCta:"Atvērt rokasgrāmatu",
+    flashName:"AI Flash Lab",
+    flashBody:"Vadītāja rīkkopa 2 vai 3 stundu darbnīcai, kurā komandas izstrādā MI risinājumu kādam izglītības izaicinājumam: no problēmas līdz prototipam un prezentācijai.",
+    flashCta:"Atvērt AI Flash Lab",
+    newTab:"(atveras jaunā cilnē)",
+    replay:"Spēlēt vēlreiz",
+    announce:v => `Atbilde: ${v}.`,
+    foot:"Pierādījumi: Fesler, Martinez Claeys, Agnew un Loeb (2026), The Evidence Base on AI in K-12, Stanford SCALE; Liang u. c. (2023); un katrā kartītē minētie mācīšanās zinātnes pētījumi. Projekti: Stanford Accelerator for Learning sēklas granti."
+  }
+}
+};
+
+/* ---------- Exit links (check both still load on the morning of the event) ---------- */
+const LINKS = {
+  tinkery:  "https://aitinkery.com/playbook",
+  flashLab: "https://flashlab.stanford.edu/"
+};
+const isRealLink = url => /^https?:\/\/[^/\s]+\.[^/\s]+/i.test(url || "") && !/example\.|placeholder|todo|xxx/i.test(url);
+
+/* ---------- State (kept only on this device) ---------- */
+const STORE_KEY = "tof-keynote-game-v1";
+const SCREENS = ["intro","r1","r2","r3","exit"];
+const fresh = () => ({ screen:"intro", pos:{ r1:0, r2:0 }, votes:{} });
+const guessLang = () => { try { return (navigator.languages || [navigator.language || ""]).some(l => /^lv\b/i.test(l)) ? "lv" : "en"; } catch (e) { return "en"; } };
+let state = Object.assign({ lang:null }, fresh());
+try {
+  const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+  if (saved && typeof saved === "object") {
+    if (saved.lang === "en" || saved.lang === "lv") state.lang = saved.lang;
+    if (SCREENS.includes(saved.screen)) state.screen = saved.screen;
+    if (saved.pos && typeof saved.pos === "object") state.pos = { r1:+saved.pos.r1 || 0, r2:+saved.pos.r2 || 0 };
+    if (saved.votes && typeof saved.votes === "object") state.votes = saved.votes;
+  }
+} catch (e) {}
+if (!state.lang) state.lang = guessLang();
+function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+/* ---------- Helpers ---------- */
+const T = () => I18N[state.lang];
+const U = () => T().ui;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const vclass = v => "v-" + v;
+const items = rk => rk === "r1" ? T().R1 : T().R2;
+function announce(t){ const l = document.getElementById("live"); l.textContent = ""; setTimeout(() => { l.textContent = t; }, 30); }
+const hashScreen = () => { const h = location.hash.slice(1); return SCREENS.includes(h) ? h : null; };
+function setHash(screen){ if (location.hash !== "#" + screen) try { history.replaceState(null, "", "#" + screen); } catch (e) {} }
+function show(screen){ state.screen = screen; save(); setHash(screen); render(); window.scrollTo({ top:0 }); document.getElementById("app").focus({ preventScroll:true }); }
+function go(screen){ if (location.hash !== "#" + screen) try { history.pushState(null, "", "#" + screen); } catch (e) {} show(screen); }
+function score(){
+  let right = 0, answered = 0;
+  for (const it of T().R1.concat(T().R2)) { const v = state.votes[it.id]; if (v) { answered++; if (v === it.answer) right++; } }
+  return { right, answered };
+}
+
+/* ---------- Views ---------- */
+function renderChrome(){
+  const t = T();
+  document.documentElement.lang = state.lang;
+  document.title = t.title;
+  document.getElementById("brand").textContent = t.brand;
+  const nav = document.getElementById("nav");
+  nav.setAttribute("aria-label", t.ui.nav);
+  nav.innerHTML = t.SCREENS.map(([k, l]) => `<button type="button" data-go="${k}" ${state.screen === k ? 'aria-current="step"' : ""}>${esc(l)}</button>`).join("");
+  const cur = nav.querySelector('[aria-current="step"]');
+  if (cur && cur.scrollIntoView) cur.scrollIntoView({ block:"nearest", inline:"nearest" });
+  document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang)));
+  document.getElementById("foot").textContent = t.ui.foot;
+}
+function render(){
+  renderChrome();
+  const s = state.screen;
+  document.getElementById("app").innerHTML = s === "r1" || s === "r2" ? viewRound(s) : s === "r3" ? viewR3() : s === "exit" ? viewExit() : viewIntro();
+}
+
+function viewIntro(){
+  const t = T(), u = U();
+  return `
+  <div class="stack">
+    <section class="hero" aria-labelledby="t">
+      <h1 id="t" class="display">${esc(t.brand)}</h1>
+      <p>${esc(u.heroP)}</p>
+      <div class="chips" aria-hidden="true">${["true","false","unknown"].map(v => `<span class="chip ${vclass(v)}">${esc(t.VERDICT[v])}</span>`).join("")}</div>
+      <button class="btn" type="button" data-go="r1">${esc(u.start)}</button>
+    </section>
+    <section class="howto" aria-label="${esc(u.howtoLabel)}">
+      <ol>${u.howto.map(([h, d]) => `<li><b>${esc(h)}</b><span class="muted">${esc(d)}</span></li>`).join("")}</ol>
+    </section>
+    <p class="note">${esc(u.privacy)}</p>
+  </div>`;
+}
+
+function viewRound(rk){
+  const t = T(), u = U(), list = items(rk);
+  const i = Math.max(0, Math.min(list.length - 1, state.pos[rk] || 0));
+  const it = list[i], voted = state.votes[it.id];
+  const opts = rk === "r1" ? ["true","false","unknown"] : ["true","false"];
+  const nextLabel = i < list.length - 1 ? u.next : rk === "r1" ? u.toR2 : u.toR3;
+  const body = !voted ? `
+      <div class="votes ${opts.length === 3 ? "three" : "two"}" role="group" aria-label="${esc(u.yourVote)}">
+        ${opts.map(o => `<button type="button" class="vote ${vclass(o)}" data-vote="${o}" data-item="${it.id}">${esc(t.VERDICT[o])}</button>`).join("")}
+      </div>` : `
+      <div class="stamp ${vclass(it.answer)}">${esc(t.VERDICT[it.answer])}</div>
+      <p class="you">${esc(u.youSaid(t.VERDICT[voted]))} ${esc(voted === it.answer ? u.right : u.wrong)}</p>`;
+  const reveal = voted ? `
+    <section class="reveal" aria-label="${esc(u.evidenceLabel)}">
+      ${it.name ? `<p class="kicker">${esc(it.name)}</p>` : ""}
+      <p class="headline display">${esc(it.headline)}</p>
+      <ul>${it.points.map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+      <p class="source">${esc(u.source)} ${esc(it.source)}</p>
+    </section>
+    <button class="btn block" type="button" data-next="${rk}">${esc(nextLabel)}</button>` : "";
+  return `
+  <div class="stack">
+    <p class="kicker">${esc(rk === "r1" ? u.r1Name : u.r2Name)}</p>
+    <section class="stage" aria-label="${esc(u.stmt(i + 1, list.length))}">
+      <p class="count">${esc(u.stmt(i + 1, list.length))}</p>
+      <h2 class="statement display">${esc(t.q(it.text))}</h2>
+      ${body}
+    </section>
+    ${reveal}
+    <div class="row">
+      ${i > 0 ? `<button class="linkbtn" type="button" data-prev="${rk}">${esc(u.prev)}</button>` : "<span></span>"}
+      ${voted ? `<button class="linkbtn" type="button" data-revote="${it.id}">${esc(u.revote)}</button>` : ""}
+    </div>
+  </div>`;
+}
+
+function viewR3(){
+  const t = T(), u = U(), sc = score();
+  return `
+  <div class="stack">
+    <div class="stack" style="gap:8px">
+      <p class="kicker">${esc(u.r3Kicker)}</p>
+      <p class="lede">${esc(sc.answered ? u.r3Score(sc.right, sc.answered) : u.r3NoScore)}</p>
+    </div>
+    ${t.R3.map((m, k) => `
+      <section class="match" aria-label="${esc(u.matchLabel(k + 1))}">
+        <div class="pair">
+          <div class="half"><span class="lab">${esc(u.aiClaim)}</span><b>${esc(m.claim)}</b><span class="chip ${vclass(m.claimV)}">${esc(t.VERDICT[m.claimV])}</span></div>
+          <span class="plus" aria-hidden="true">+</span>
+          <div class="half"><span class="lab">${esc(u.principle)}</span><b>${esc(m.principle)}</b><span class="muted small">${esc(m.principleNote)}</span></div>
+        </div>
+        ${m.projects.map(p => `<div class="project"><span class="who">${esc(u.testing(p.who))}</span><h3 class="display" lang="en">${esc(p.name)}</h3><p>${esc(p.what)}</p></div>`).join("")}
+      </section>`).join("")}
+    <p class="note">${esc(u.r3Note)}</p>
+    <button class="btn block" type="button" data-go="exit">${esc(u.toExit)}</button>
+  </div>`;
+}
+
+function viewExit(){
+  const u = U(), sc = score();
+  const cards = [
+    { url:LINKS.tinkery, name:u.tinkeryName, body:u.tinkeryBody, cta:u.tinkeryCta },
+    { url:LINKS.flashLab, name:u.flashName, body:u.flashBody, cta:u.flashCta }
+  ].filter(c => isRealLink(c.url));
+  return `
+  <div class="stack">
+    <div class="stack exit-head" style="gap:10px">
+      <h1 class="display">${esc(u.exitTitle)}</h1>
+      ${sc.answered ? `<p class="score">${esc(u.exitScore(sc.right, sc.answered))}</p>` : ""}
+      <p class="lede">${esc(u.exitLede)}</p>
+    </div>
+    ${cards.map(c => `
+      <section class="link-card">
+        <h2 class="display">${esc(c.name)}</h2>
+        <p class="muted">${esc(c.body)}</p>
+        <a class="btn" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.cta)}<span class="sr"> ${esc(u.newTab)}</span></a>
+      </section>`).join("")}
+    <button class="btn secondary block" type="button" data-action="restart">${esc(u.replay)}</button>
+  </div>`;
+}
+
+/* ---------- Events ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  const d = b.dataset;
+  if (d.lang) { if (d.lang !== state.lang) { state.lang = d.lang; save(); const y = window.scrollY; render(); window.scrollTo({ top:y }); } return; }
+  if (d.go) { go(d.go); return; }
+  if (d.vote) {
+    state.votes[d.item] = d.vote; save(); render();
+    const it = T().R1.concat(T().R2).find(x => x.id === d.item);
+    announce(U().announce(T().VERDICT[it.answer]));
+    return;
+  }
+  if (d.revote) { delete state.votes[d.revote]; save(); render(); return; }
+  if (d.next) {
+    const rk = d.next;
+    if (state.pos[rk] < items(rk).length - 1) { state.pos[rk]++; save(); render(); window.scrollTo({ top:0 }); }
+    else go(rk === "r1" ? "r2" : "r3");
+    return;
+  }
+  if (d.prev) { state.pos[d.prev] = Math.max(0, state.pos[d.prev] - 1); save(); render(); return; }
+  if (d.action === "restart") { Object.assign(state, fresh()); go("intro"); }
+});
+
+window.addEventListener("hashchange", () => { const h = hashScreen(); if (h && h !== state.screen) show(h); });
+
+/* ---------- Start ---------- */
+const fromHash = hashScreen();
+if (fromHash) state.screen = fromHash;
+setHash(state.screen);
+render();
+// Offline after first load. Only on a real http(s) host; a missing sw.js just means no offline cache.
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("sw.js").catch(() => {}); });
+}
+</script>
+</body>
+</html>
